@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 import pandas as pd
 from pandas import ExcelWriter
 from pandas import ExcelFile
 
-df = pd.read_excel('marchxl.xlsx')
+df = pd.read_excel('march2.xlsx')
 #Remove the empty columns
 df.drop(df.columns[[20,21,22,23,24,25,26]], axis=1, inplace=True)
 #Remove controversiality, downs, ups, edited, retrieved_on, score,name, archived, score_hidden,
@@ -28,10 +27,22 @@ for i,j in df.iterrows():
 from datetime import datetime
 list_dateiso=[]
 for i,j in df.iterrows():
- 
+ #ISO8601
  date_iso=datetime.utcfromtimestamp(df.loc[i,'created_utc']).isoformat()
  list_dateiso.append(date_iso)
 
 df['created_iso']=list_dateiso
-
-
+df.sort_values(by='created_iso', inplace=True)
+#DUPLICATES
+duplicateRowsDF = df[df.duplicated(['body', 'author'])]
+#some authors are bots, let's check
+isitbot=df[df.author.isin(['autotldr'])]
+df = df[df.author != 'autotldr']
+isitbot=df[df.author.isin(['mvea','ClickableLinkBot'])]
+df = df[df.author != 'alternate-source-bot']
+df = df[df.author != 'ClickableLinkBot']
+df = df[df.author != 'mvea']
+# we just droping the rest of the duplicates
+df=df.drop_duplicates(subset=['body'])
+#FOR FREQUENCY
+df['created_iso'].value_counts()[:]
