@@ -19,6 +19,13 @@ from pandas import ExcelFile
 #!pip install spacy
 import spacy
 
+# Gensim
+import gensim
+import gensim.corpora as corpora
+from gensim.utils import simple_preprocess
+from gensim.models import CoherenceModel
+from gensim.models.ldamodel import LdaModel
+
 #Import dataset
 df = pd.read_excel('march2.xlsx')
 #Remove the empty columns
@@ -77,7 +84,7 @@ botlist=['autotldr', 'alternate-source-bot', 'ClickableLinkBot', 'mvea', 'Decron
 for bot in botlist:
  df = df[df.author != bot ]
  
- # We just droping the rest of the duplicates
+# We just droping the rest of the duplicates
 df=df.drop_duplicates(subset=['body'], keep='last')
 df = df.reset_index(drop=True)
 df=df.drop(df.index[499]) #one duplicate that our function didn't detect
@@ -126,8 +133,57 @@ df['clean'].replace(regex=True,inplace=True,to_replace=r'self.?driving (car|cars
 df['clean'].replace(regex=True,inplace=True,to_replace=r'self driving ',value=r'selfdriving ')
 df['clean'].replace(regex=True,inplace=True,to_replace=r'car|cars',value=r'car ')
 
+#Make the comments a list
+data = df.clean.values.tolist()
+#Tokenize
+def sent_to_words(sentences):
+    for sentence in sentences:
+        yield(gensim.utils.simple_preprocess(str(sentence), deacc=True))  # deacc=True removes punctuations
+
+data_words = list(sent_to_words(data))
+print(data_words[:1])
+
+##Bigrams are two words frequently occurring together in the document. Trigrams are 3 words frequently occurring.
+# Build the bigram and trigram models
+bigram = gensim.models.Phrases(data_words, min_count=5, threshold=100) # higher threshold fewer phrases.
+bigram_mod = gensim.models.phrases.Phraser(bigram)
+# See trigram example
+print(trigram_mod[bigram_mod[data_words[0]]])
 
 
+###LET'S DO IT
+def make_bigrams(texts):
+    return [bigram_mod[doc] for doc in texts]
 
+
+# Form Bigrams
+data_words_bigrams = make_bigrams(data_words)
+print(data_words_bigrams[11])
+
+# Do lemmatization keeping only noun, vb
+##Initialize spacy 'en' model, keeping only tagger component (for efficiency)
+import spacy
+nlp=spacy.load('en_core_web_sm',disable=['parse', 'ner'])
+
+def lemmatization(texts, allowed_postags=['NOUN','VERB']):
+    
+    texts_out = []
+    for sent in texts:
+        doc = nlp(" ".join(sent)) 
+        texts_out.append([token.lemma_ for token in doc if token.pos_ in allowed_postags])
+    return texts_out
+data_lemmatized = lemmatization(data_words_bigrams, allowed_postags=['NOUN', 'VERB'])
+
+# Create Dictionary and Save it as a pickle file
+id2word = corpora.Dictionary(data_lemmatized)
+import pickle
+f = open("dict.pkl","wb")
+pickle.dump(id2word,f)
+f.close()
+# Create Corpus
+texts = data_lemmatized
+f1 = open("corp.pkl","wb")
+pickle.dump(texts,f1)
+f1.close()
 
 
