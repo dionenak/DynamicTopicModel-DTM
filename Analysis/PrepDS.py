@@ -162,7 +162,6 @@ print(data_words_bigrams[11])
 
 # Do lemmatization keeping only noun, vb
 ##Initialize spacy 'en' model, keeping only tagger component (for efficiency)
-import spacy
 nlp=spacy.load('en_core_web_sm',disable=['parse', 'ner'])
 
 def lemmatization(texts, allowed_postags=['NOUN','VERB']):
