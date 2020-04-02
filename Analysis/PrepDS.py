@@ -5,6 +5,11 @@ Created on Tue Mar 17 20:58:59 2020
 @author: dio
 """
 
+# setting working directory
+#import os
+#path=""
+#os.chdir(path)
+
 import nltk; nltk.download('stopwords')
 import re
 import numpy as np
@@ -100,9 +105,9 @@ df = df[(df['created_iso'] < '2018-03-22') | (df['created_iso'] > '2018-03-23')]
 df = df.reset_index(drop=True)
 
 #How many comments per timeslice
-print(len(df.loc[(df['created_iso']< '2018-03-18')]))
-print(len(df.loc[(df['created_iso']> '2018-03-18') & (df['created_iso'] < '2018-03-22')]))  
-print(len(df.loc[(df['created_iso']> '2018-03-22')]))
+print(len(df.loc[(df['created_iso']< '2018-03-18')])) ##1816
+print(len(df.loc[(df['created_iso']> '2018-03-18') & (df['created_iso'] < '2018-03-22')])) ## 2817
+print(len(df.loc[(df['created_iso']> '2018-03-22')])) ## 2164
 
 
 # Uses a regex to detect and remove links and html  
@@ -147,8 +152,7 @@ print(data_words[:1])
 # Build the bigram and trigram models
 bigram = gensim.models.Phrases(data_words, min_count=5, threshold=100) # higher threshold fewer phrases.
 bigram_mod = gensim.models.phrases.Phraser(bigram)
-# See trigram example
-print(trigram_mod[bigram_mod[data_words[0]]])
+
 
 
 ###LET'S DO IT
@@ -175,9 +179,24 @@ data_lemmatized = lemmatization(data_words_bigrams, allowed_postags=['NOUN', 'VE
 
 # Create Dictionary and Save it as a pickle file
 id2word = corpora.Dictionary(data_lemmatized)
+id2word_1 = corpora.Dictionary(data_lemmatized[0:1816])
+id2word_2 = corpora.Dictionary(data_lemmatized[1816:4633])
+id2word_3 = corpora.Dictionary(data_lemmatized[4633:])
+
+
+
 import pickle
 f = open("dict.pkl","wb")
 pickle.dump(id2word,f)
+f.close()
+f = open("dict_1.pkl","wb")
+pickle.dump(id2word_1,f)
+f.close()
+f = open("dict_2.pkl","wb")
+pickle.dump(id2word_2,f)
+f.close()
+f = open("dict_3.pkl","wb")
+pickle.dump(id2word_3,f)
 f.close()
 # Create Corpus
 texts = data_lemmatized
