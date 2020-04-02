@@ -133,7 +133,8 @@ plt.ylabel("Coherence score")
 plt.legend(("coherence_values"), loc='best')
 plt.show()
 ##Cv for timeslice3
-model_list, coherence_values = compute_coherence_values_UMASS(dictionary=id2word_3, corpus=corpus_3, texts=text_3, start=2, limit=40, step=6)
+model_list, coherence_values = compute_coherence_values_UMASS(dictionary=id2word_3,
+                                                              corpus=corpus_3, texts=text_3, start=2, limit=40, step=6)
 # Show graph
 x = range(start, limit, step)
 plt.plot(x, coherence_values)
