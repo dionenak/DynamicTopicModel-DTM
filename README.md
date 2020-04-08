@@ -21,3 +21,6 @@ we would need further in our analysis.
 - TopicCoh_LDA: includes the computation of two topic coherence measurements for a range of
 topics numbers- Cv and Umass. We separated each timeslice and implemented LDA on each, in order
 for us to find the most suitable number of topics and go on with our analysis.
+- DMT_analysis: includes the training of DMT model, saving/loading the model, make a dataframe
+ with all topics and word frequencies. Last but not least, we used pyLDAvis for visualization
+ of each time slice topics' structure.
